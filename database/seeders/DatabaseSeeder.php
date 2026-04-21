@@ -15,11 +15,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::query()->updateOrCreate(
+            ['email' => env('ADMIN_EMAIL', 'admin@wirapindo.local')],
+            [
+                'name' => env('ADMIN_NAME', 'Admin Konten & Operasional'),
+                'role' => 'admin',
+                'password' => env('ADMIN_PASSWORD', 'admin12345'),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'role' => 'user',
+                'password' => 'password',
+            ]
+        );
     }
 }

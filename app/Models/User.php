@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
 
@@ -32,6 +34,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'api_token_hash',
     ];
 
     /**
@@ -43,7 +46,33 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'api_token_created_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function issueAdminToken(): string
+    {
+        $plainToken = Str::random(64);
+
+        $this->forceFill([
+            'api_token_hash' => hash('sha256', $plainToken),
+            'api_token_created_at' => now(),
+        ])->save();
+
+        return $plainToken;
+    }
+
+    public function revokeAdminToken(): void
+    {
+        $this->forceFill([
+            'api_token_hash' => null,
+            'api_token_created_at' => null,
+        ])->save();
     }
 }
